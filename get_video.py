@@ -10,11 +10,12 @@ def get_image_from_video(filename, index):
     return the mat that represents the frame
     """
     cap = cv2.VideoCapture(filename)
-    i = 0:
-    while (i < index):
-        i+=1
+    i = 0
+    while (i <= index):
         frame = cap.read()
-    return frame
+        if (i==index):
+            return frame
+        i+=1
 
 def get_video(filename):
     pass
