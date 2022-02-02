@@ -1,4 +1,4 @@
-#script to get the video file
+#script to get the frame from file
 import cv2
 import torch
 
