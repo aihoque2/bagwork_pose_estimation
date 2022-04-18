@@ -14,7 +14,7 @@ from torchvision.transforms import ToTensor
 
 import cv2
 
-def load_mode(modelname):
+def load_model(modelname):
     """
     load which model to use for psoe estimation given the name
     """
