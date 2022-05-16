@@ -20,7 +20,9 @@ def get_image_from_video(filename, index):
         success, frame = cap.read()
         if (i==index):
             return frame
+            
         i+=1
 
 def get_video(filename):
-    pass
+    cap = cv2.VideoCapture(filename)
+    return cap

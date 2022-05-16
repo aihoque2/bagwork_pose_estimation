@@ -18,6 +18,10 @@ import cv2
 
 _thisdir = osp.realpath(osp.dirname(__file__)) #TODO: wtf this do?
 
+device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+
+#QUESTION FOR CODERS: should  implement each function and test
+#or should i implement all at once?
 
 def load_model(modelname):
     """
@@ -41,7 +45,14 @@ def load_model(modelname):
 
     return model #remember objects get returned by reference
 
-def run_dope_on_mat(image, model, postprocessing="ppi"):
+def load_model(modelname, postprocessing='ppi'):
+    
+
+    ckpt_fname = osp.join(_thisdir, 'models', modelname+'.pth.tgz')
+    ckpt = torch.load(cpkft_fname, map_location=device)
+
+
+def run_dope_on_mat(image: Image, model, postprocessing="ppi"):
     """
     TODO: run a simple pose estimation with the given model.
     this function is like dope() in dope.py, but we add another
@@ -49,6 +60,9 @@ def run_dope_on_mat(image, model, postprocessing="ppi"):
 
     this assumes model has been loaded
     """
+    
+    img_tensor = [ToTensor()(image).to(device)]
+
     pass
 
 
