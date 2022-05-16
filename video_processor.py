@@ -49,8 +49,11 @@ def load_model(modelname, postprocessing='ppi'):
     
 
     ckpt_fname = osp.join(_thisdir, 'models', modelname+'.pth.tgz')
-    ckpt = torch.load(cpkft_fname, map_location=device)
+    ckpt = torch.load(ckpt_fname, map_location=device)
+    print("WE GOT ckpt: ", ckpt)
 
+    ckpt['dope_kwargs']['rpn_post_nms_top_n_test'] = 1000
+    model = dope_resnet50(**ckpt['dope_kwargs'])
 
 def run_dope_on_mat(image: Image, model, postprocessing="ppi"):
     """
