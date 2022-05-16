@@ -55,6 +55,14 @@ def load_model(modelname, postprocessing='ppi'):
     ckpt['dope_kwargs']['rpn_post_nms_top_n_test'] = 1000
     model = dope_resnet50(**ckpt['dope_kwargs'])
 
+    #TODO: Check if we support half-computation
+    if ckpt['half']: 
+        model = model.half()
+    model = model.eval()
+    model.load_state_dict(ckpt['state_dict'])
+    model = model.to(device)
+    return model
+
 def run_dope_on_mat(image: Image, model, postprocessing="ppi"):
     """
     TODO: run a simple pose estimation with the given model.
