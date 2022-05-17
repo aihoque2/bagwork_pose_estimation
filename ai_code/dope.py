@@ -43,6 +43,8 @@ def dope(imagename, modelname, postprocessing='ppi'):
     model = model.eval()
     model.load_state_dict(ckpt['state_dict'])
     model = model.to(device)
+
+    print("here's model type: ", type(model))
         
     # load the image
     print('Loading image', imagename)

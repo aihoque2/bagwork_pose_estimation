@@ -9,7 +9,8 @@ from PIL import Image
 import cv2
 import numpy as np
 
-from ai_code.model import dope_resnet50, num_joints
+import ai_code.postprocess as postprocess
+from ai_code.model import Dope_RCNN, dope_resnet50, num_joints
 
 import torch
 from torchvision.transforms import ToTensor
@@ -63,7 +64,7 @@ def load_model(modelname, postprocessing='ppi'):
     model = model.to(device)
     return model
 
-def run_dope_on_mat(image: Image, model, postprocessing="ppi"):
+def run_dope_on_mat_NMS(image: Image, model: Dope_RCNN, postprocessing="ppi"):
     """
     TODO: run a simple pose estimation with the given model.
     this function is like dope() in dope.py, but we add another
@@ -71,11 +72,25 @@ def run_dope_on_mat(image: Image, model, postprocessing="ppi"):
 
     this assumes model has been loaded
     """
-    
+    ckpt_fname = osp.join(_thisdir, 'models', modelname+'.pth.tgz')
+    ckpt = torch.load(ckpt_fname, map_location=device)
+
     img_tensor = [ToTensor()(image).to(device)]
+    if ckpt['half']: imlist = [im.half() for im in imlist]
+    resolution = imlist[0].size()[-2:]
 
-    pass
-
+    #run DOPE
+    with torch.no_grad():
+        results = model(imlist, None)[0]
+    
+    #TODO: we go the results now how do we extract them?
+    #NMS method...2D pose
+    
+    parts = ["body", "hand", "face"]
+    detections = {}
+    
+    for part in parts:
+        dets, indices, bestcls = postprocess.DOPE_NMS(results[part+'_scores'], results['boxes'], results[part+'_pose2d'], results[part+'_pose3d'], min_score=0.3)
 
 
 def process_video(filename, video):
