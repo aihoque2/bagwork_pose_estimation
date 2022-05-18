@@ -10,7 +10,9 @@ import cv2
 import numpy as np
 
 import ai_code.postprocess as postprocess
+import ai_code.visu as visu
 from ai_code.model import Dope_RCNN, dope_resnet50, num_joints
+
 
 import torch
 from torchvision.transforms import ToTensor
@@ -91,7 +93,23 @@ def run_dope_on_mat_NMS(image: Image, model: Dope_RCNN, postprocessing="ppi"):
     
     for part in parts:
         dets, indices, bestcls = postprocess.DOPE_NMS(results[part+'_scores'], results['boxes'], results[part+'_pose2d'], results[part+'_pose3d'], min_score=0.3)
+        dets = {k: v.float().data.cpu().numpy() for k,v in dets.items()}
+        detections[part] = [{'score': dets['score'][i], 'pose2d': dets['pose2d'][i,...], 'pose3d': dets['pose3d'][i,...]} for i in range(dets['score'].size)]
+        if part == 'hand':
+            for i in range(len(detections[part])):
+                detections[part][i]['hand_isright'] = bestcls<ckpt['hand_ppi_kwargs']['K']
 
+    # assignment of hands and head to body
+    detections, body_with_wrists, body_with_head = postprocess.assign_hands_and_head_to_body(detections)
+
+    #creating mat to return
+    det_poses2d = {part: np.stack([d['pose2d'] for d in part_detections], axis=0) if len(part_detections > 0) else np.empty( (0, num_joints[part], 2), dtype=np.float32) for part, part_detections in detections.items()}
+    scores = {part: [d['score'] for d in part_detections] for part, part_detections in detections.items()}
+    imout = visu.visualize_bodyhandface2d(np.asarray(image)[:,:,::-1],
+                                            det_poses2d,
+                                            dict_scores=scores,
+                                            )
+    return imout
 
 def process_video(filename, video):
     """
