@@ -26,7 +26,7 @@ device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 #QUESTION FOR CODERS: should  implement each function and test
 #or should i implement all at once?
 
-def load_model(modelname):
+def load_model(modelname, postprocessing='ppi'):
     """
     load which model to use for psoe estimation given the name
     """
@@ -38,19 +38,6 @@ def load_model(modelname):
     if not os.path.isfile(ckpt_fname):
         raise Exception('{:s} does not exist, please download the model first and place it in the models/ folder'.format(ckpt_fname))
     
-    ckpt = torch.load(cpkft_fname, map_location=device)
-    ckpt['dope_kwargs']['rpn_post_nms_top_n_test'] = 1000
-    model = dope_resnet50(**ckpt['dope_kwargs'])
-    if ckpt['half']: model = model.half()
-    model = model.eval()
-    model.load_state_dict(ckpt['state_dict'])
-    model = model.to(device)
-
-    return model #remember objects get returned by reference
-
-def load_model(modelname, postprocessing='ppi'):
-    
-
     ckpt_fname = osp.join(_thisdir, 'models', modelname+'.pth.tgz')
     ckpt = torch.load(ckpt_fname, map_location=device)
     print("WE GOT ckpt: ", ckpt)
